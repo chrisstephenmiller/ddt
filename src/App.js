@@ -73,7 +73,7 @@ class App extends Component {
             New Game
           </div>
           <div className='button' onClick={() => this.newBall()}>
-            New Ball
+            New Balls
           </div>
         </div>
         <div className='balls'>

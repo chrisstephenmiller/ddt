@@ -51,4 +51,5 @@ body {
 .ball {
   text-decoration: underline;
   text-shadow: 1px 1px 1px white;
+  border: 1px solid white;
 }

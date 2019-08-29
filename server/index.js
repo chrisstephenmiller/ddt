@@ -6,13 +6,15 @@ const port = process.env.PORT || 5000
 const db = require('./db')
 const path = require('path')
 
+const source = process.env.ENVIRONMENT === 'PROD' ? 'build' : 'public'
+
 app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(express.static(path.join(__dirname, '..', 'build')))
+app.use(express.static(path.join(__dirname, '..', `${source}`)))
 app.use('/api', require('./api'))
 app.use('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'build/index.html'))
+    res.sendFile(path.join(__dirname, '..', `${source}/index.html`))
   })
 app.use((err, req, res, next) => {
     console.error(err)
