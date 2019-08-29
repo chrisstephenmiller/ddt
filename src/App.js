@@ -25,24 +25,26 @@ class App extends Component {
     window.location.href = `../games/${game.data.id}`
     this.setState({ game: true })
   }
-  
+
   getGame = async () => {
     const gameId = window.location.href.split('/').slice(-1)[0]
     try {
       const game = await axios.get(`/api/games/${gameId}`)
-      if (!game.data) this.newGame()
-    } catch (err) {console.log(err)}
+      if (!game.data.id) this.newGame()
+      return game
+    } catch (err) { console.log(err) }
   }
 
   getBalls = async () => {
     const gameId = window.location.href.split('/').slice(-1)[0]
     const gameBalls = await axios.get(`/api/games/${gameId}/balls`)
+    if (!gameBalls.data.length) this.newBalls()
     this.setState({ balls: gameBalls.data })
   }
 
-  newBall = async () => {
+  newBalls = async () => {
     const gameId = window.location.href.split('/').slice(-1)[0]
-    const colors = prompt('Please enter new ball colors, seperated by commas.', 'red,blue,yellow,green,orange,black')
+    const colors = prompt('Please enter ball colors, seperated by commas.', 'red,blue,yellow,green,orange,black')
     const ballColors = colors ? colors.split(',').filter(color => color).map(color => color.trim()) : null
     if (ballColors) await axios.post(`/api/games/${gameId}/balls`, { ballColors })
     this.getBalls()
@@ -59,23 +61,21 @@ class App extends Component {
   }
 
   componentDidMount = async () => {
-    this.getGame()
-    this.getBalls()
+    const validate = window.location.pathname.split('/')
+    if (validate[1] !== 'games') window.location.href = '../games/'
+    else if (!validate[2] || +validate[2] < 1) this.newGame()
+    else {
+      const game = await this.getGame()
+      if (game.data.id) this.getBalls()
+    }
   }
 
   render() {
     const { balls } = this.state
-    const fontSize = `${150 / balls.length}px`
+    const fontSize = `${48 / balls.length}vh`
+    const lineHeight = `${68 / balls.length}vh`
     return (
       <div className="App">
-        <div className='buttons'>
-          <div className='button' onClick={() => this.newGame()}>
-            New Game
-          </div>
-          <div className='button' onClick={() => this.newBall()}>
-            New Balls
-          </div>
-        </div>
         <div className='balls'>
           {balls.sort((a, b) => a.id - b.id).map(ball => {
             const { color } = ball
@@ -83,24 +83,26 @@ class App extends Component {
             ball.deadBalls.push(ball)
             return (
               <div className='ball-list' key={ball.id}>
-                <span
+                <p
                   className='ball'
                   onClick={() => this.hitWicket(ball.id)}
-                  style={{ color, fontSize }}>
+                  style={{ backgroundColor: color, color: 'white', fontSize, lineHeight }}>
                   {color}
-                </span>
+                </p>
+                <hr style={{width: '100%', margin: '0px'}}></hr>
                 {ball.deadBalls.sort((a, b) => a.id - b.id).map(deadBall => {
                   const { dead } = deadBall.dead
-                  const deadStyle = { color: 'white', textDecoration: 'line-through', fontSize }
-                  const aliveSTyle = { color: deadBall.color, textDecoration: 'none', fontSize }
+                  const backgroundColor = deadBall.color
+                  const deadStyle = { color: 'white', textDecoration: 'line-through', border: `1px solid ${backgroundColor}`, fontSize, lineHeight, backgroundColor }
+                  const aliveSTyle = { color: backgroundColor, textDecoration: 'none', border: `1px solid ${backgroundColor}`, fontSize, lineHeight, backgroundColor: 'white' }
                   if (deadBall.id === ball.id) deadStyle.opacity = 0
                   return (
-                    <span key={`${ball.id}-${deadBall.id}`}
+                    <p key={`${ball.id}-${deadBall.id}`}
                       className='dead'
                       style={dead ? deadStyle : aliveSTyle}
                       onClick={() => this.makeDead(ball.id, deadBall.id)}>
                       {deadBall.color}
-                    </span>
+                    </p>
                   )
                 })}
               </div>)

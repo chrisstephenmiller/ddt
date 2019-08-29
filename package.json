@@ -16,6 +16,7 @@
     "sequelize": "^5.16.0"
   },
   "scripts": {
+    "start-dev": "react-scripts start",
     "start": "node server",
     "build": "react-scripts build",
     "test": "react-scripts test",
