@@ -44,7 +44,7 @@ class App extends Component {
 
   newBalls = async () => {
     const gameId = window.location.href.split('/').slice(-1)[0]
-    const colors = prompt('Please enter ball colors, seperated by commas.', 'red,blue,yellow,green,orange,black')
+    const colors = prompt('Please enter ball colors, separated by commas.', 'red,blue,yellow,green,orange,black')
     const ballColors = colors ? colors.split(',').filter(color => color).map(color => color.trim()) : null
     if (ballColors) await axios.post(`/api/games/${gameId}/balls`, { ballColors })
     this.getBalls()
